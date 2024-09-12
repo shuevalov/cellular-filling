@@ -7,12 +7,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import ru.shuevalov.cellular_filling.ui.theme.CellularFillingTheme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,13 +38,24 @@ class MainActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxSize()
                 ) {
+                    val similarCells by remember { mutableIntStateOf(0) }
+                    val previousCellState by remember { mutableStateOf(CellState.DEFAULT) }
+                    var cells by remember { mutableStateOf(listOf<CellState>()) }
                     Text(
                         text = "Cellular filling",
                         fontSize = 24.sp,
                     )
-                    CellList()
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(cells) {
+                            CreateCell(cellState = it)
+                        }
+                    }
                     MakeButton {
-
+                        val newCellState =
+                            if (Random.nextBoolean()) CellState.ALIVE else CellState.DEAD
+                        cells += newCellState
                     }
                 }
             }
@@ -45,15 +63,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-enum class LifeState {
+enum class CellState {
     ALIVE,
     DEAD,
-    LIFE
+    LIFE,
+    DEFAULT
 }
 
 @Composable
 fun MakeButton(onClick: () -> Unit) {
-    Button(onClick = { onClick() }) {
+    Button(
+        onClick = { onClick() },
+        modifier = Modifier
+    ) {
         Text(text = "Make")
     }
 }
@@ -62,7 +84,7 @@ fun MakeButton(onClick: () -> Unit) {
 fun Cell(
     text: String,
     text2: String,
-    lifeState: LifeState,
+    lifeState: CellState,
     modifier: Modifier = Modifier
 ) {
     ListItem(
@@ -80,8 +102,50 @@ fun Cell(
 }
 
 @Composable
+fun AliveCell(modifier: Modifier = Modifier) {
+    Cell(
+        "Alive",
+        "and moving!",
+        CellState.ALIVE
+    )
+}
+
+@Composable
+fun DeadCell(modifier: Modifier = Modifier) {
+    Cell(
+        "Dead",
+        "or joking",
+        CellState.DEAD
+    )
+}
+
+@Composable
+fun LifeCell(modifier: Modifier = Modifier) {
+    Cell(
+        "Life",
+        "coo-coo!",
+        CellState.LIFE
+    )
+}
+
+@Composable
+fun CreateCell(
+    cellState: CellState,
+    modifier: Modifier = Modifier
+) {
+    when (cellState) {
+        CellState.ALIVE -> AliveCell()
+        CellState.DEAD -> DeadCell()
+        CellState.LIFE -> LifeCell()
+        else -> return
+    }
+}
+
+@Composable
 fun CellList(modifier: Modifier = Modifier) {
-    // TODO
+    LazyColumn {
+
+    }
 }
 
 @Preview(showBackground = true)
@@ -92,13 +156,24 @@ fun Preview() {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
+            val similarCells by remember { mutableIntStateOf(0) }
+            val previousCellState by remember { mutableStateOf(CellState.DEFAULT) }
+            var cells by remember { mutableStateOf(listOf<CellState>()) }
             Text(
                 text = "Cellular filling",
                 fontSize = 24.sp,
             )
-            CellList()
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(cells) {
+                    CreateCell(cellState = it)
+                }
+            }
             MakeButton {
-
+                val newCellState =
+                    if (Random.nextBoolean()) CellState.ALIVE else CellState.DEAD
+                cells += newCellState
             }
         }
     }
