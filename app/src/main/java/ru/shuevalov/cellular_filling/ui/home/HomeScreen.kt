@@ -2,6 +2,7 @@ package ru.shuevalov.cellular_filling.ui.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,28 +15,27 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import ru.shuevalov.cellular_filling.ui.theme.CellularFillingTheme
-import kotlin.random.Random
-
-enum class CellState {
-    ALIVE, DEAD, LIFE, DEFAULT
-}
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = viewModel()
 ) {
     Column(
         modifier = Modifier
@@ -46,37 +46,35 @@ fun HomeScreen(
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        val uiState by viewModel.uiState.collectAsState()
         val listState = rememberLazyListState()
-        var cells by remember {
-            mutableStateOf(listOf<CellState>())
-        }
-        Text(
-            text = "Cellular filling",
-            fontSize = 24.sp,
-        )
+
+        Header(viewModel = viewModel)
+
         Spacer(modifier = Modifier.size(16.dp))
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize()
         ) {
-            items(cells) {
+            items(uiState.cells) {
                 CreateCell(cellState = it)
             }
         }
+
+        LaunchedEffect(key1 = uiState.cells) {
+            withContext(Dispatchers.Main) {
+                listState.animateScrollToItem(uiState.cells.lastIndex
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.size(16.dp))
+
         Button(
-            onClick = {
-                val newCellState = if (Random.nextBoolean()) CellState.ALIVE else CellState.DEAD
-                cells += newCellState
-                if (cells.size >= 3) {
-                    val lastThree = cells.takeLast(3)
-                    if (lastThree.all { it == CellState.ALIVE })
-                        cells += CellState.LIFE
-//                    else if (lastThree.all { it == CellState.DEAD })
-//                    todo: delete life cell if 3 dead
-                }
-            }, modifier = Modifier
+            onClick = { viewModel.addNewCells() },
+            modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.1f)
         ) {
@@ -85,6 +83,29 @@ fun HomeScreen(
     }
 }
 
+@Composable
+fun Header(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Cellular filling",
+            fontSize = 24.sp,
+            modifier = Modifier
+                .weight(1f)
+                .align(Alignment.CenterVertically)
+        )
+        OutlinedButton(
+            onClick = { viewModel.clearAllCells() },
+            modifier = Modifier
+        ) {
+            Text(text = "Clear")
+        }
+    }
+}
 
 @Composable
 fun Cell(
