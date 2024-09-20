@@ -27,7 +27,7 @@ class HomeViewModel : ViewModel() {
         // todo
     }
 
-    fun addNewCells() {
+    fun addNewCells(): CellState { // return cell state for snack bar message
         val newCell = getRandomCell()
         val same = currentCell == newCell // чтобы можно было проверить без старого курента
         addCell(newCell)
@@ -37,20 +37,23 @@ class HomeViewModel : ViewModel() {
                 when (newCell) {
                     CellState.ALIVE -> {
                         addCell(CellState.LIFE)
-                        currentCell = CellState.LIFE
+                        sameCellsCount = 0
+                        return CellState.LIFE // make snack bar "Life cell created"
                     }
 
                     CellState.DEAD -> {
                         removeLifeCell()
+                        sameCellsCount = 0
+                        return CellState.DEAD // make snack bar "Life cell removed"
                     }
 
-                    else -> return
+                    else -> return CellState.DEFAULT
                 }
-                sameCellsCount = 0
             }
         } else {
             sameCellsCount = 0
         }
+        return CellState.DEFAULT
     }
 
     fun clearAllCells() {

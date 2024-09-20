@@ -1,5 +1,6 @@
 package ru.shuevalov.cellular_filling.ui.home
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,9 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +51,8 @@ fun HomeScreen(
     ) {
         val uiState by viewModel.uiState.collectAsState()
         val listState = rememberLazyListState()
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
 
         Header(viewModel = viewModel)
 
@@ -73,7 +78,18 @@ fun HomeScreen(
         Spacer(modifier = Modifier.size(16.dp))
 
         Button(
-            onClick = { viewModel.addNewCells() },
+            onClick = {
+                val toastMessageState = viewModel.addNewCells()
+                when (toastMessageState) {
+                    CellState.LIFE -> {
+                        Toast.makeText(context, "Life cell created!", Toast.LENGTH_SHORT).show()
+                    }
+                    CellState.DEAD -> {
+                        Toast.makeText(context, "Life cell removed :(", Toast.LENGTH_SHORT).show()
+                    }
+                    else -> return@Button
+                }
+                      },
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.1f)
