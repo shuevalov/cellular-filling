@@ -23,13 +23,33 @@ class HomeViewModel : ViewModel() {
         }
     }
 
-    private fun removeLifeCell() {
-        // todo
+    private fun removeLifeCell(): Boolean { //
+        val noLifeList = mutableListOf<CellState>()
+        var lifeIsRemoved = false
+        uiState.value.cells.reversed().forEach {
+            if (it == CellState.LIFE) {
+                if (lifeIsRemoved) {
+                    noLifeList.add(it)
+                } else {
+                    lifeIsRemoved = true
+                }
+            } else {
+                noLifeList.add(it)
+            }
+        }
+        if (lifeIsRemoved) {
+            _uiState.update { currentState ->
+                currentState.copy(cells = noLifeList.reversed().toList())
+            }
+            return true
+        } else {
+            return false
+        }
     }
 
-    fun addNewCells(): CellState { // return cell state for snack bar message
+    fun addNewCells(): CellState { // return cell state for toast message
         val newCell = getRandomCell()
-        val same = currentCell == newCell // чтобы можно было проверить без старого курента
+        val same = currentCell == newCell // for check without previous current cell
         addCell(newCell)
         if (same) {
             sameCellsCount++
@@ -38,13 +58,17 @@ class HomeViewModel : ViewModel() {
                     CellState.ALIVE -> {
                         addCell(CellState.LIFE)
                         sameCellsCount = 0
-                        return CellState.LIFE // make snack bar "Life cell created"
+                        return CellState.LIFE // make toast "Life cell created"
                     }
 
                     CellState.DEAD -> {
-                        removeLifeCell()
+                        val lifeIsRemoved = removeLifeCell()
                         sameCellsCount = 0
-                        return CellState.DEAD // make snack bar "Life cell removed"
+                        return if (lifeIsRemoved) {
+                            CellState.DEAD // make toast "Life cell removed"
+                        } else {
+                            CellState.DEFAULT // life isn't removed, no toast
+                        }
                     }
 
                     else -> return CellState.DEFAULT
