@@ -31,8 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import ru.shuevalov.cellular_filling.ui.theme.CellularFillingTheme
 
 @Composable
@@ -58,20 +56,18 @@ fun HomeScreen(
 
         Spacer(modifier = Modifier.size(16.dp))
 
+        LaunchedEffect(key1 = uiState.cells) {
+            listState.animateScrollToItem(listState.layoutInfo.totalItemsCount)
+        }
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
-                .fillMaxSize()
+                .fillMaxSize(),
+            state = listState
         ) {
             items(uiState.cells) {
                 CreateCell(cellState = it)
-            }
-        }
-
-        LaunchedEffect(key1 = uiState.cells) {
-            withContext(Dispatchers.Main) {
-                listState.animateScrollToItem(uiState.cells.lastIndex
-                )
             }
         }
 
