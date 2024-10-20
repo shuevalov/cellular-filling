@@ -1,6 +1,7 @@
 package ru.shuevalov.cellular_filling.ui.home
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
@@ -25,12 +27,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ru.shuevalov.cellular_filling.R
 import ru.shuevalov.cellular_filling.ui.theme.CellularFillingTheme
 
 @Composable
@@ -80,12 +85,14 @@ fun HomeScreen(
                     CellState.LIFE -> {
                         Toast.makeText(context, "Life cell created!", Toast.LENGTH_SHORT).show()
                     }
+
                     CellState.DEAD -> {
                         Toast.makeText(context, "Life cell removed :(", Toast.LENGTH_SHORT).show()
                     }
+
                     else -> return@Button
                 }
-                      },
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(0.1f)
@@ -124,6 +131,7 @@ fun Cell(
     text: String,
     text2: String,
     color: Color,
+    imageRes: Int
 ) {
     Card {
         ListItem(
@@ -132,15 +140,16 @@ fun Cell(
             ),
             headlineContent = { Text(text, color = color) },
             supportingContent = { Text(text2, color = color) },
-//        leadingContent = {
-//            Image(
-//                painter = painterResource(id = R.mipmap.ic_launcher), // temporarily
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .clip(CircleShape)
-//            )
-//        }
-//            todo: image
+            leadingContent = {
+
+                Image(
+                    painter = painterResource(id = imageRes), // temporarily
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                )
+            }
         )
     }
     Spacer(modifier = Modifier.size(16.dp))
@@ -150,15 +159,15 @@ fun Cell(
 fun CreateCell(cellState: CellState) {
     when (cellState) {
         CellState.ALIVE -> {
-            Cell(text = "Alive", text2 = "and moving!", Color.Green)
+            Cell(text = "Alive", text2 = "and moving!", Color.Green, R.mipmap.heart)
         }
 
         CellState.DEAD -> {
-            Cell(text = "Dead", text2 = "or pretending to", Color.Red)
+            Cell(text = "Dead", text2 = "or pretending to", Color.Red, R.mipmap.skull)
         }
 
         CellState.LIFE -> {
-            Cell(text = "Life", text2 = "coo-coo!", Color.Yellow)
+            Cell(text = "Life", text2 = "coo-coo!", Color.Yellow,  R.mipmap.bird)
         }
 
         else -> return
