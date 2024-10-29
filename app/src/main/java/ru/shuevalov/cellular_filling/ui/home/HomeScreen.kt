@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import ru.shuevalov.cellular_filling.R
 import ru.shuevalov.cellular_filling.ui.theme.CellularFillingTheme
 
 @Composable
@@ -54,7 +52,7 @@ fun HomeScreen(
     ) {
         val uiState by viewModel.uiState.collectAsState()
         val listState = rememberLazyListState()
-        val scope = rememberCoroutineScope()
+//        val scope = rememberCoroutineScope()
         val context = LocalContext.current
 
         Header(viewModel = viewModel)
@@ -72,7 +70,7 @@ fun HomeScreen(
             state = listState
         ) {
             items(uiState.cells) {
-                CreateCell(cellState = it)
+                Cell(it)
             }
         }
 
@@ -128,22 +126,19 @@ fun Header(
 
 @Composable
 fun Cell(
-    text: String,
-    text2: String,
-    color: Color,
-    imageRes: Int
+    cell: CellState
 ) {
     Card {
         ListItem(
             colors = ListItemDefaults.colors(
                 containerColor = Color.White
             ),
-            headlineContent = { Text(text, color = color) },
-            supportingContent = { Text(text2, color = color) },
+            headlineContent = { Text(cell.text, color = cell.color) },
+            supportingContent = { Text(cell.text2, color = cell.color) },
             leadingContent = {
 
                 Image(
-                    painter = painterResource(id = imageRes), // temporarily
+                    painter = painterResource(id = cell.imageRes), // temporarily
                     contentDescription = "",
                     modifier = Modifier
                         .size(40.dp)
@@ -153,25 +148,6 @@ fun Cell(
         )
     }
     Spacer(modifier = Modifier.size(16.dp))
-}
-
-@Composable
-fun CreateCell(cellState: CellState) {
-    when (cellState) {
-        CellState.ALIVE -> {
-            Cell(text = "Alive", text2 = "and moving!", Color.Green, R.mipmap.heart)
-        }
-
-        CellState.DEAD -> {
-            Cell(text = "Dead", text2 = "or pretending to", Color.Red, R.mipmap.skull)
-        }
-
-        CellState.LIFE -> {
-            Cell(text = "Life", text2 = "coo-coo!", Color.Yellow,  R.mipmap.bird)
-        }
-
-        else -> return
-    }
 }
 
 @Preview(showBackground = true)
